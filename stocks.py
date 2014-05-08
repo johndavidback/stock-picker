@@ -12,7 +12,7 @@ for quote in sys.argv[1:]:
     # First thing we want is some basic information on the quote.
     details = ystockquote.get_all(quote)
 
-    
+    print 'Last Open: $%s' % details.get('today_open')
 
 
 
