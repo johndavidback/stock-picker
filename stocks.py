@@ -6,6 +6,7 @@ from datetime import datetime
 
 import ystockquote
 from dateutil.relativedelta import relativedelta
+from urllib2 import HTTPError
 
 def ben_graham(eps, next_eps, bond_yield=4.24):
     """
@@ -29,7 +30,11 @@ def get_volatility(quote, days=70):
     """
     today = datetime.today().strftime("%Y-%m-%d")
     fifty_ago = (datetime.today() - relativedelta(days=days)).strftime("%Y-%m-%d")
-    prices = ystockquote.get_historical_prices(str(quote), fifty_ago, today)
+    
+    try:
+        prices = ystockquote.get_historical_prices(str(quote), fifty_ago, today)
+    except HTTPError:
+        return 0
 
     total = 0
     for d, p in prices.iteritems():
@@ -39,6 +44,9 @@ def get_volatility(quote, days=70):
     volatility = round(total / len(prices), 4) * 100
 
     return volatility
+
+undervalued_stocks = []
+ignore_dividend_stocks = []
 
 for quote in sys.argv[1:]:
     # Let's set up some basic criteria to see if this is a stock that
@@ -69,17 +77,31 @@ for quote in sys.argv[1:]:
     VOLATILITY = True if volatility > VOLATILITY_RATE else False
 
     # Get Ben grahams formula
-    eps = float(ystockquote.get_eps(quote))
-    next_eps = float(ystockquote.get_eps_estimate_next_year(quote))
-    iv = ben_graham(eps, next_eps, 2.95)
+    try:
+        eps = float(ystockquote.get_eps(quote))
+    except ValueError:
+        # Likely returned N/A
+        eps = 0
+    try:
+        next_eps = float(ystockquote.get_eps_estimate_next_year(quote))
+    except ValueError:
+        next_eps = 0
 
+    # IV stands for Intrinsic Value.  What the stock is possibly really worth.
+    iv = ben_graham(eps, next_eps, 2.95)
     print 'Intrinsic value: $%s' % iv
 
-    # Get the relative intrinsic value, RIV
-    riv = round(iv / last_trade, 4)
-    print 'RIV: %s' % riv  # We want RIV to be better than 1.00, which would mean it's undervalued.
+    if iv != 0:
+        # Get the relative intrinsic value, RIV
+        riv = round(iv / last_trade, 4)
+        print 'RIV: %s' % riv  # We want RIV to be better than 1.00, which would mean it's undervalued.
+        RIV_RATIO = True if riv > RIV_RATE else False
+    else:
+        riv = 0
 
-    RIV_RATIO = True if riv > RIV_RATE else False
+    # Add to our list if applicable
+    if riv > 1.0:
+        undervalued_stocks.append(quote)
 
     # Check out the dividends on this babe
     try:
@@ -91,5 +113,10 @@ for quote in sys.argv[1:]:
 
     if DIVIDEND_YIELD and RIV_RATIO and VOLATILITY:
         print '***** Check out: %s *****' % quote
+    elif RIV_RATIO and VOLATILITY:
+        ignore_dividend_stocks.append(quote)
 
     print ''
+
+print 'The undervalued stocks are:', str(undervalued_stocks)
+print 'Ignoring dividends, these warrant a look:', str(ignore_dividend_stocks)
