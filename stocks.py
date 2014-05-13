@@ -65,6 +65,8 @@ for quote in sys.argv[1:]:
     PE_RATIO = False  # We want it at 15 or less.
     DESIRED_PE_RATIO = 15
 
+    AAA_BOND_RATE = 3.96
+
     print 'Finding quote for %s' % quote
 
     # First thing we want is some basic information on the quote.
@@ -72,7 +74,7 @@ for quote in sys.argv[1:]:
 
     last_trade = float(ystockquote.get_last_trade_price(str(quote)))
 
-    print 'Last Open: $%s' % details.get('today_open'), 'Last Trade: $%s' % last_trade
+    print 'Today Open: $%s' % details.get('today_open'), 'Last Trade: $%s' % last_trade
     print 'Today\'s Change: %s' % ystockquote.get_todays_value_change(quote).split(' ')[2].rstrip('"')
 
     # Get the past ~50 BIZ days of trading.
@@ -92,8 +94,7 @@ for quote in sys.argv[1:]:
         next_eps = 0
 
     # IV stands for Intrinsic Value.  What the stock is possibly really worth.
-    iv = ben_graham(eps, next_eps, 2.95)
-    print 'Intrinsic value: $%s' % iv
+    iv = ben_graham(eps, next_eps, AAA_BOND_RATE)
 
     if iv != 0:
         # Get the relative intrinsic value, RIV
