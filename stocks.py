@@ -111,12 +111,10 @@ for quote in sys.argv[1:]:
     try:
         pe = float(ystockquote.get_pe(quote))
         print 'P/E ratio: %s' % pe
-
         PE_RATIO = True if pe <= DESIRED_PE_RATIO else False
     except ValueError:
         pe = 'Check Research'
         pass
-
 
     # Check out the dividends on this babe
     try:
