@@ -156,7 +156,6 @@ for quote in sys.argv[1:]:
         print '***** Check out: %s, mind the PE (%s) *****' % (quote, pe)
     elif RIV_RATIO and VOLATILITY:
         ignore_dividend_stocks.append(quote)
->>>>>>> 4298b254aaaed78182e4def68374038940357984
 
     print ''
 
