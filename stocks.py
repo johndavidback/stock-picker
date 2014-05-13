@@ -18,7 +18,7 @@ def ben_graham(eps, next_eps, bond_yield=4.24):
     growth_rate = next_eps
 
     # The top part of the fraction: EPS x (8.5 + 2g) x 4.4
-    numerator = eps * (8.5 + 2 * growth_rate) * 4.4
+    numerator = eps * (8.5 + (2 * growth_rate)) * 4.4
     iv = numerator / bond_yield
 
     return round(iv, 3)
@@ -53,13 +53,17 @@ for quote in sys.argv[1:]:
     # warrants further inspection. These will be boolean markers we'll flip on 
     # if it makes sense.
     DIVIDEND_YIELD = False  # Let's say we want this >= %1
-    DIVIDEND_RATE = 1
+    DESIRED_DIVIDEND_RATE = 1
 
+    # Relative Intrinsic value
     RIV_RATIO = False  # Let's say we want this > 1.00
-    RIV_RATE = 1
+    DESIRED_RIV_RATE = 1
 
     VOLATILITY = False  # Let's say we want this > 2.0%
-    VOLATILITY_RATE = 2
+    DESIRED_VOLATILITY_RATE = 2
+
+    PE_RATIO = False  # We want it at 15 or less.
+    DESIRED_PE_RATIO = 15
 
     print 'Finding quote for %s' % quote
 
@@ -74,7 +78,7 @@ for quote in sys.argv[1:]:
     # Get the past ~50 BIZ days of trading.
     volatility = get_volatility(quote)
     print 'Volatility: %s%%' % (volatility)
-    VOLATILITY = True if volatility > VOLATILITY_RATE else False
+    VOLATILITY = True if volatility > DESIRED_VOLATILITY_RATE else False
 
     # Get Ben grahams formula
     try:
@@ -95,7 +99,7 @@ for quote in sys.argv[1:]:
         # Get the relative intrinsic value, RIV
         riv = round(iv / last_trade, 4)
         print 'RIV: %s' % riv  # We want RIV to be better than 1.00, which would mean it's undervalued.
-        RIV_RATIO = True if riv > RIV_RATE else False
+        RIV_RATIO = True if riv > DESIRED_RIV_RATE else False
     else:
         riv = 0
 
@@ -103,16 +107,29 @@ for quote in sys.argv[1:]:
     if riv > 1.0:
         undervalued_stocks.append(quote)
 
+    # Check out the PE ratio.
+    try:
+        pe = float(ystockquote.get_pe(quote))
+        print 'P/E ratio: %s' % pe
+
+        PE_RATIO = True if pe <= DESIRED_PE_RATIO else False
+    except ValueError:
+        pe = 'Check Research'
+        pass
+
+
     # Check out the dividends on this babe
     try:
         div_yield = float(ystockquote.get_dividend_yield(quote))
         print 'Dividend yield: %s%%' % div_yield
-        DIVIDEND_YIELD = True if div_yield >= DIVIDEND_RATE else False 
+        DIVIDEND_YIELD = True if div_yield >= DESIRED_DIVIDEND_RATE else False 
     except ValueError:
         print 'Dividend yield: %s' % ystockquote.get_dividend_yield(quote)
 
-    if DIVIDEND_YIELD and RIV_RATIO and VOLATILITY:
+    if DIVIDEND_YIELD and RIV_RATIO and VOLATILITY and PE_RATIO:
         print '***** Check out: %s *****' % quote
+    elif DIVIDEND_YIELD and RIV_RATIO and VOLATILITY:
+        print '***** Check out: %s, mind the PE (%s) *****' % (quote, pe)
     elif RIV_RATIO and VOLATILITY:
         ignore_dividend_stocks.append(quote)
 
