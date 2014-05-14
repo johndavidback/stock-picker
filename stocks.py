@@ -74,7 +74,7 @@ for quote in sys.argv[1:]:
 
     last_trade = float(ystockquote.get_last_trade_price(str(quote)))
 
-    print 'Today Open: $%s' % details.get('today_open'), 'Last Trade: $%s' % last_trade
+    print 'Prev Close: %s' % details.get('previous_close'), 'Today Open: $%s' % details.get('today_open'), 'Last Trade: $%s' % last_trade
     print 'Today\'s Change: %s' % ystockquote.get_todays_value_change(quote).split(' ')[2].rstrip('"')
 
     # Get the past ~50 BIZ days of trading.
