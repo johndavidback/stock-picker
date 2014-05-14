@@ -48,7 +48,9 @@ def get_volatility(quote, days=70):
 undervalued_stocks = []
 ignore_dividend_stocks = []
 
-for quote in sys.argv[1:]:
+quote_list = sys.argv[1:]
+
+for quote in quote_list:
     # Let's set up some basic criteria to see if this is a stock that
     # warrants further inspection. These will be boolean markers we'll flip on 
     # if it makes sense.
@@ -124,32 +126,6 @@ for quote in sys.argv[1:]:
         DIVIDEND_YIELD = True if div_yield >= DESIRED_DIVIDEND_RATE else False 
     except ValueError:
         print 'Dividend yield: %s' % ystockquote.get_dividend_yield(quote)
-
-    # days = 71
-    # print 'Last 50 days'
-    # last_open = None
-    # total_change = 0
-    # for d, p in prices.iteritems():
-    #     day_open = float(p.get('Open'))
-
-    #     # Calculate the percentage change
-    #     if last_open:
-    #         change = str(round(day_open / last_open, 3)) + '%'
-
-    #         if day_open > last_open:
-    #             change = '+' + change
-    #             total_change += round(day_open / last_open, 3)
-    #         else:
-    #             change = '-' + change
-    #             total_change -= round(day_open / last_open, 3)
-    #     else:
-    #         change = ''
-
-    #     last_open = day_open
-
-    #     print '%s: %s %s' % (d, day_open, change)
-
-    # print total_change / len(prices)
 
     if DIVIDEND_YIELD and RIV_RATIO and VOLATILITY and PE_RATIO:
         print '***** Check out: %s *****' % quote
