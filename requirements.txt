@@ -1,4 +1,4 @@
 python-dateutil==2.2
 six==1.6.1
 wsgiref==0.1.2
-ystockquote==0.2.5dev
+-e git://github.com/johndavidback/ystockquote.git@dd497310b07b59ba819e5361655c73eddbfce567#egg=ystockquote
