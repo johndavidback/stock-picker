@@ -72,12 +72,22 @@ for quote in quote_list:
     print 'Finding quote for %s' % quote
 
     # First thing we want is some basic information on the quote.
-    details = ystockquote.get_all(quote)
+    details = ystockquote.get_by_id_list(quote, [
+        'p',  # 0 Previous close
+        'l1',  # 1 Last trade price
+        'o',  # 2 Today's open
+        'w1',  # 3 Today's value change
+        'e7',  # 4 EPS - Current year
+        'e9',  # 5 EPS - Next year
+        'r',  # 6 PE ratio
+        'y',  # 7 Dividend yield
+    ])
 
-    last_trade = float(ystockquote.get_last_trade_price(str(quote)))
+    # Set up some variables that are used throughout
+    last_trade = float(details[1])
 
-    print 'Prev Close: %s' % details.get('previous_close'), 'Today Open: $%s' % details.get('today_open'), 'Last Trade: $%s' % last_trade
-    print 'Today\'s Change: %s' % ystockquote.get_todays_value_change(quote).split(' ')[2].rstrip('"')
+    print 'Prev Close: %s' % details[0], 'Today Open: $%s' % details[2], 'Last Trade: $%s' % last_trade
+    print 'Today\'s Change: %s' % details[3].split(' ')[2].rstrip('"')
 
     # Get the past ~50 BIZ days of trading.
     volatility = get_volatility(quote)
@@ -86,12 +96,12 @@ for quote in quote_list:
 
     # Get Ben grahams formula
     try:
-        eps = float(ystockquote.get_eps(quote))
+        eps = float(details[4])
     except ValueError:
         # Likely returned N/A
         eps = 0
     try:
-        next_eps = float(ystockquote.get_eps_estimate_next_year(quote))
+        next_eps = float(details[5])
     except ValueError:
         next_eps = 0
 
@@ -112,7 +122,7 @@ for quote in quote_list:
 
     # Check out the PE ratio.
     try:
-        pe = float(ystockquote.get_pe(quote))
+        pe = float(details[6])
         print 'P/E ratio: %s' % pe
         PE_RATIO = True if pe <= DESIRED_PE_RATIO else False
     except ValueError:
@@ -121,11 +131,11 @@ for quote in quote_list:
 
     # Check out the dividends on this babe
     try:
-        div_yield = float(ystockquote.get_dividend_yield(quote))
+        div_yield = float(details[7])
         print 'Dividend yield: %s%%' % div_yield
         DIVIDEND_YIELD = True if div_yield >= DESIRED_DIVIDEND_RATE else False 
     except ValueError:
-        print 'Dividend yield: %s' % ystockquote.get_dividend_yield(quote)
+        print 'Dividend yield: %s' % details[7]
 
     if DIVIDEND_YIELD and RIV_RATIO and VOLATILITY and PE_RATIO:
         print '***** Check out: %s *****' % quote
