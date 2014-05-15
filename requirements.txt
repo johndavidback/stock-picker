@@ -1,4 +1,6 @@
+beautifulsoup4==4.3.2
 python-dateutil==2.2
+requests==2.2.1
 six==1.6.1
 wsgiref==0.1.2
--e git://github.com/johndavidback/ystockquote.git@dd497310b07b59ba819e5361655c73eddbfce567#egg=ystockquote
+-e git://github.com/johndavidback/ystockquote.git@dd497310b07b59ba819e5361655c73eddbfce567#egg=ystockquote-master

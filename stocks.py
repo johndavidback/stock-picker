@@ -3,6 +3,8 @@
 import sys
 from pprint import pprint
 from datetime import datetime
+from bs4 import BeautifulSoup
+import requests
 
 import ystockquote
 from dateutil.relativedelta import relativedelta
@@ -45,10 +47,40 @@ def get_volatility(quote, days=70):
 
     return volatility
 
+def get_sp_500_list():
+    """
+    returns a list of the most recent s&p 500
+    """
+    # We are going to scrape this url
+    url = "http://www.stockmarketsreview.com/companies_sp500/"
+
+    soup = BeautifulSoup(requests.get(url).content)
+
+    # It's the second table.
+    table = soup.find_all('table')[1]
+    rows = table.findAll('tr')
+
+    symbols = []
+    for i, row in enumerate(rows):
+        if i:
+            # If it's in the NYSE column
+            if row.findAll('td')[2].string:
+                symbols.append(row.findAll('td')[2].string)
+            else:
+                # Otherwise, it's in the NASDAQ column
+                symbols.append(row.findAll('td')[3].string)
+
+    return symbols
+
+hopefuls = []
+hopefuls_mind_pe = []
 undervalued_stocks = []
 ignore_dividend_stocks = []
 
-quote_list = sys.argv[1:]
+if sys.argv[1] == '500':
+    quote_list = get_sp_500_list()
+else:
+    quote_list = sys.argv[1:]
 
 for quote in quote_list:
     # Let's set up some basic criteria to see if this is a stock that
@@ -139,12 +171,16 @@ for quote in quote_list:
 
     if DIVIDEND_YIELD and RIV_RATIO and VOLATILITY and PE_RATIO:
         print '***** Check out: %s *****' % quote
+        hopefuls.append(quote)
     elif DIVIDEND_YIELD and RIV_RATIO and VOLATILITY:
         print '***** Check out: %s, mind the PE (%s) *****' % (quote, pe)
+        hopefuls_mind_pe.append(quote)
     elif RIV_RATIO and VOLATILITY:
         ignore_dividend_stocks.append(quote)
 
     print ''
 
+print 'The hopefuls are:', str(hopefuls)
+print 'Hopeful, but mind the pe are:', str(hopefuls_mind_pe)
 print 'The undervalued stocks are:', str(undervalued_stocks)
 print 'Ignoring dividends, these warrant a look:', str(ignore_dividend_stocks)
