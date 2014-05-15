@@ -17,6 +17,10 @@ Or you can do something like:
 
 To get info on several.  Neat.
 
+Or, to pull the S&P 500 automatically and run our analysis on all of them:
+
+    python stocks.py 500
+
 
 disclaimer
 ----------
