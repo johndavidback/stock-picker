@@ -114,13 +114,16 @@ def process():
             'e9',  # 5 EPS - Next year
             'r',  # 6 PE ratio
             'y',  # 7 Dividend yield
+            'k5',  # 8 Percent from 52wk high
+            'j6', # 9 Percent from 52wk low
         ])
 
         # Set up some variables that are used throughout
         last_trade = float(details[1])
 
-        print 'Prev Close: %s' % details[0], 'Today Open: $%s' % details[2], 'Last Trade: $%s' % last_trade
+        print 'Prev Close: %s,' % details[0], 'Today Open: $%s,' % details[2], 'Last Trade: $%s,' % last_trade
         print 'Today\'s Change: %s' % details[3].split(' ')[2].rstrip('"')
+        print '%% from 52wk Low: %s,' % details[9], '%% from 52wk High: %s' % details[8]
 
         # Get the past ~50 BIZ days of trading.
         volatility = get_volatility(quote)
