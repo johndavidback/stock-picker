@@ -102,8 +102,6 @@ def process():
 
         AAA_BOND_RATE = 3.96
 
-        print 'Finding quote for %s' % quote
-
         # First thing we want is some basic information on the quote.
         details = ystockquote.get_by_id_list(quote, [
             'p',  # 0 Previous close
@@ -116,7 +114,10 @@ def process():
             'y',  # 7 Dividend yield
             'k5',  # 8 Percent from 52wk high
             'j6', # 9 Percent from 52wk low
+            'n',  # 10 Name
         ])
+
+        print 'Finding quote for %s (%s)' % (details[10], quote)
 
         # Set up some variables that are used throughout
         last_trade = float(details[1])
